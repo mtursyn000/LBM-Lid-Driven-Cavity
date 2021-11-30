@@ -2,10 +2,6 @@
 
 A simple C++ version LBM solving Lid Driven Cavity problem
 
-# LBM-Lid-Driven-Cavity
-
-A simple C++ version LBM solving Lid Driven Cavity problem
-
 3 parts 
 
 # 1. Main function: 
