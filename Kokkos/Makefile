@@ -1,6 +1,6 @@
 KOKKOS_PATH = ${HOME}/Kokkos/kokkos
 KOKKOS_DEVICES = "OpenMP"
-EXE_NAME = "01_Exercise"
+EXE_NAME = "LBM"
 
 SRC = $(wildcard *.cpp)
 
