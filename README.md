@@ -19,5 +19,11 @@ A simple C++ version LBM solving Lid Driven Cavity problem
   ```
   g++ .\System.cpp .\lbm.cpp .\main.cpp -o run
   ```
+  
+  # Kokkos
+    
+  ```
+  make -j KOKKOS_DEVICES=Cuda
+  ```
 
 
