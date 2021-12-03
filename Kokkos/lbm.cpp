@@ -45,7 +45,7 @@ void LBM::Initialize()
 
     Kokkos::parallel_for(
         "initf", mdrange_policy3({0, 0, 0}, {q, lx, ly}), KOKKOS_CLASS_LAMBDA(const int ii, const int i, const int j) {
-            f(ii, i, j) = t(ii) * rho(i, j) +
+            f(ii, i, j) = t(ii) * p(i, j) * 3.0 +
                           t(ii) * (3.0 * (e(ii, 0) * ua(i, j) + e(ii, 1) * va(i, j)) +
                                    4.5 * pow(e(ii, 0) * ua(i, j) + e(ii, 1) * va(i, j), 2) -
                                    1.5 * (pow(ua(i, j), 2) + pow(va(i, j), 2)));
@@ -58,7 +58,7 @@ void LBM::Collision()
 
     Kokkos::parallel_for(
         "collision", mdrange_policy3({0, 2, 2}, {q, lx - 2, ly - 2}), KOKKOS_CLASS_LAMBDA(const int ii, const int i, const int j) {
-            double feq = t(ii) * rho(i, j) +
+            double feq = t(ii) * p(i, j) * 3.0 +
                          t(ii) * (3.0 * (e(ii, 0) * ua(i, j) + e(ii, 1) * va(i, j)) +
                                   4.5 * pow(e(ii, 0) * ua(i, j) + e(ii, 1) * va(i, j), 2) -
                                   1.5 * (pow(ua(i, j), 2) + pow(va(i, j), 2)));
@@ -109,7 +109,7 @@ void LBM::Update()
             ua(i, j) = 0;
             va(i, j) = 0;
             p(i, j) = 0;
-            rho(i, j) = 0;
+            rho(i, j) = rho0;
         });
 
     for (int j = 2; j < this->ly - 2; j++)
@@ -118,7 +118,7 @@ void LBM::Update()
         {
             for (int ii = 0; ii < q; ii++)
             {
-                rho(i, j) = rho(i, j) + f(ii, i, j);
+                p(i, j) = p(i, j) + f(ii, i, j)/3.0;
                 ua(i, j) = ua(i, j) + f(ii, i, j) * e(ii, 0);
                 va(i, j) = va(i, j) + f(ii, i, j) * e(ii, 1);
             }
@@ -141,7 +141,7 @@ void LBM::Output(int n)
         for (int i = 2; i < this->lx - 2; i++)
         {
 
-            outfile << std::setprecision(8) << setiosflags(std::ios::left) << (i - 2.0) / (lx - 5.0) << " " << (j - 2.0) / (ly - 5.0) << " " << ua(i, j) << " " << va(i, j) << " " << rho(i, j) << std::endl;
+            outfile << std::setprecision(8) << setiosflags(std::ios::left) << (i - 2.0) / (lx - 5.0) << " " << (j - 2.0) / (ly - 5.0) << " " << ua(i, j) << " " << va(i, j) << " " << p(i, j) << std::endl;
         }
     }
 
