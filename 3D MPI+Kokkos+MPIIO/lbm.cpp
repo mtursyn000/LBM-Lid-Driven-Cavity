@@ -225,6 +225,7 @@ void LBM::Collision()
 
             f(ii, i, j, k) -= (f(ii, i, j, k) - feq) / (tau0 + 0.5);
         });
+    Kokkos::fence();
 };
 
 void LBM::Streaming()
@@ -294,7 +295,7 @@ void LBM::Streaming()
             "bcu", mdrange_policy3({0, ghost - 1, ghost - 1}, {q, lx - ghost + 1, ly - ghost + 1}), KOKKOS_CLASS_LAMBDA(const int ii, const int i, const int j) {
                 if (e(ii, 2) < 0)
                 {
-                    f(ii, i, j, l_e[2]) = f(bb(ii), i + 2 * e(ii, 0), j + 2 * e(ii, 1), l_e[2] - 2) + 6 * e(ii, 0) * t(bb(ii)) * u0;
+                    f(ii, i, j, l_e[2]) = f(bb(ii), i + 2 * e(ii, 0), j + e(ii, 1), l_e[2] - 2);
                 }
             });
     }
@@ -311,12 +312,14 @@ void LBM::Streaming()
         "stream2", mdrange_policy4({0, ghost, ghost, ghost}, {q, lx - ghost, ly - ghost, lz - ghost}), KOKKOS_CLASS_LAMBDA(const int ii, const int i, const int j, const int k) {
             f(ii, i, j, k) = ft(ii, i, j, k);
         });
+
+    Kokkos::fence();
 };
 
 void LBM::Update()
 {
     Kokkos::parallel_for(
-        "initv", mdrange_policy3({0, 0, 0}, {lx, ly, lz}), KOKKOS_CLASS_LAMBDA(const int i, const int j, const int k) {
+        "post", mdrange_policy3({0, 0, 0}, {lx, ly, lz}), KOKKOS_CLASS_LAMBDA(const int i, const int j, const int k) {
             ua(i, j, k) = 0;
             va(i, j, k) = 0;
             wa(i, j, k) = 0;
@@ -337,6 +340,8 @@ void LBM::Update()
                     va(i, j, k) = va(i, j, k) + f(ii, i, j, k) * e(ii, 1);
                     wa(i, j, k) = wa(i, j, k) + f(ii, i, j, k) * e(ii, 2);
                 }
+                if (z_hi == glz - 1)
+                    ua(i, j, l_e[2] - 1) = 0.1;
             }
         }
     }
@@ -381,7 +386,7 @@ void LBM::MPIoutput(int n)
                 vv[i + j * l_l[0] + k * l_l[1] * l_l[0]] = va(i + ghost, j + ghost, k + ghost);
                 ww[i + j * l_l[0] + k * l_l[1] * l_l[0]] = wa(i + ghost, j + ghost, k + ghost);
                 pp[i + j * l_l[0] + k * l_l[1] * l_l[0]] = p(i + ghost, j + ghost, k + ghost);
-                xx[i + j * l_l[0] + k * l_l[1] * l_l[0]] = (double)4.0 * (x_lo + i) / (glx - 1);
+                xx[i + j * l_l[0] + k * l_l[1] * l_l[0]] = (double)(x_lo + i) / (glx - 1);
                 yy[i + j * l_l[0] + k * l_l[1] * l_l[0]] = (double)(y_lo + j) / (gly - 1);
                 zz[i + j * l_l[0] + k * l_l[1] * l_l[0]] = (double)(z_lo + k) / (glz - 1);
             }
@@ -596,7 +601,7 @@ void LBM::MPIoutput(int n)
         // MIN AND MAX VALUE FLOAT 64
         fp = 0.0;
         MPI_File_write(fh, &fp, 1, MPI_DOUBLE, &status);
-        fp = 4.0;
+        fp = 1.0;
         MPI_File_write(fh, &fp, 1, MPI_DOUBLE, &status);
         fp = 0.0;
         MPI_File_write(fh, &fp, 1, MPI_DOUBLE, &status);
