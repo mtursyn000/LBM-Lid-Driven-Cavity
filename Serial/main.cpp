@@ -1,9 +1,9 @@
 #include "lbm.h"
-#include "system.h"
+#include "System.h"
 
 int main(int argc, char *argv[])
 {
-    int nx = 200;
+    int nx = 100;
     int ny = 200;
 
     System s1(nx, ny);

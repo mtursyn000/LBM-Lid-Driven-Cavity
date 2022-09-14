@@ -12,7 +12,7 @@ void System::Initialize()
     this->u0 = 0.1;
     this->Ma = this->u0 / this->cs;
     this->miu = this->rho0 * this->u0 * this->R / this->Re;
-    this->Time = 1000;
+    this->Time = 10000;
     this->inter = 100;
     this->tau = this->u0 * this->sx / Re / cs2;
 };

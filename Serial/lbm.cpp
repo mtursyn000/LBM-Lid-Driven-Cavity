@@ -177,7 +177,7 @@ void LBM::Output(int n)
         for (int i = 2; i < this->lx - 2; i++)
         {
 
-            outfile << std::setprecision(8) << setiosflags(std::ios::left) << (i - 2.0) / (lx - 5.0) << " " << (j - 2.0) / (ly - 5.0) << " " << ua[l2i(i, j)] << " " << va[l2i(i, j)] << " " << rho[l2i(i, j)] << std::endl;
+            outfile << std::setprecision(8) << setiosflags(std::ios::left) << (i - 2.0) << " " << (j - 2.0)<< " " << ua[l2i(i, j)] << " " << va[l2i(i, j)] << " " << rho[l2i(i, j)] << std::endl;
         }
     }
 
